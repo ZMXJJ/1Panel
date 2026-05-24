@@ -22,6 +22,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/constant"
 	"github.com/1Panel-dev/1Panel/core/global"
 	psessionUtils "github.com/1Panel-dev/1Panel/core/init/session/psession"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
@@ -300,13 +301,14 @@ func normalizeOperationPath(reqPath string) string {
 
 func newDB(pathItem string) (*gorm.DB, error) {
 	dbFile := ""
+	dbDir := platform.DbDir(global.CONF.Base.InstallDir)
 	switch {
 	case strings.HasPrefix(pathItem, "/core/xpack") || strings.HasPrefix(pathItem, "/xpack"):
-		dbFile = path.Join(global.CONF.Base.InstallDir, "1panel/db/xpack.db")
+		dbFile = path.Join(dbDir, "xpack.db")
 	case strings.HasPrefix(pathItem, "/core"):
-		dbFile = path.Join(global.CONF.Base.InstallDir, "1panel/db/core.db")
+		dbFile = path.Join(dbDir, "core.db")
 	default:
-		dbFile = path.Join(global.CONF.Base.InstallDir, "1panel/db/agent.db")
+		dbFile = path.Join(dbDir, "agent.db")
 	}
 
 	db, _ := gorm.Open(sqlite.Open(dbFile), &gorm.Config{

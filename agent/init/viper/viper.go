@@ -3,11 +3,11 @@ package viper
 import (
 	"bytes"
 	"fmt"
-	"path"
 
 	"github.com/1Panel-dev/1Panel/agent/cmd/server/conf"
 	"github.com/1Panel-dev/1Panel/agent/global"
 	"github.com/1Panel-dev/1Panel/agent/utils/files"
+	"github.com/1Panel-dev/1Panel/agent/utils/platform"
 	"github.com/1Panel-dev/1Panel/agent/utils/xpack"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -27,9 +27,9 @@ func Init() {
 	if config.Base.Mode != "" {
 		mode = config.Base.Mode
 	}
-	if mode == "dev" && fileOp.Stat("/opt/1panel/conf/app.yaml") {
+	if mode == "dev" && fileOp.Stat(platform.AppConfigPath()) {
 		v.SetConfigName("app")
-		v.AddConfigPath(path.Join("/opt/1panel/conf"))
+		v.AddConfigPath(platform.ConfigDir())
 		if err := v.ReadInConfig(); err != nil {
 			panic(fmt.Errorf("Fatal error config file: %s \n", err))
 		}
@@ -59,6 +59,9 @@ func initBaseInfo() {
 	nodeInfo, err := xpack.MultiNodeProvider.LoadNodeInfo(true)
 	if err != nil {
 		panic(err)
+	}
+	if nodeInfo.BaseDir == "" {
+		nodeInfo.BaseDir = platform.DefaultInstallDir()
 	}
 	global.CONF.Base.InstallDir = nodeInfo.BaseDir
 }

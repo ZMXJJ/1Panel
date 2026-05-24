@@ -21,6 +21,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/i18n"
 	"github.com/1Panel-dev/1Panel/core/utils/common"
 	"github.com/1Panel-dev/1Panel/core/utils/files"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 	"github.com/1Panel-dev/1Panel/core/utils/req_helper"
 	"github.com/1Panel-dev/1Panel/core/utils/xpack"
 	"github.com/gin-gonic/gin"
@@ -239,7 +240,7 @@ func (u *ScriptService) Sync(req dto.OperateByTaskID) error {
 			return fmt.Errorf("the format of data.yaml is err: %v", err)
 		}
 
-		tmpDir := path.Join(global.CONF.Base.InstallDir, "1panel/tmp/script")
+		tmpDir := path.Join(platform.TmpDir(global.CONF.Base.InstallDir), "script")
 		if _, err := os.Stat(tmpDir); err != nil {
 			_ = os.MkdirAll(tmpDir, 0755)
 		}

@@ -4,23 +4,28 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/1Panel-dev/1Panel/agent/utils/platform"
 )
 
-const defaultFile = "/usr/local/bin/1pctl"
+func DefaultFile() string {
+	return platform.CtlFile()
+}
 
 func Load(key string) string {
-	info, err := LoadFromFile(defaultFile, key)
+	file := DefaultFile()
+	info, err := LoadFromFile(file, key)
 	if err != nil {
 		panic(err)
 	}
 	if len(info) == 0 || info == `""` {
-		panic(fmt.Sprintf("error `%s` find in %s", key, defaultFile))
+		panic(fmt.Sprintf("error `%s` find in %s", key, file))
 	}
 	return info
 }
 
 func LoadWithoutPanic(key string) string {
-	info, err := LoadFromFile(defaultFile, key)
+	info, err := LoadFromFile(DefaultFile(), key)
 	if err != nil {
 		return ""
 	}

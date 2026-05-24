@@ -10,6 +10,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/utils/cmd"
 	fileUtils "github.com/1Panel-dev/1Panel/core/utils/files"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 )
 
 func Init() {
@@ -17,13 +18,13 @@ func Init() {
 }
 
 func initLang() {
-	geoPath := path.Join(global.CONF.Base.InstallDir, "1panel/geo/GeoIP.mmdb")
+	geoPath := path.Join(platform.GeoDir(global.CONF.Base.InstallDir), "GeoIP.mmdb")
 	isLangExist := fileUtils.Stat("/usr/local/bin/lang/zh.sh")
 	isGeoExist := fileUtils.Stat(geoPath)
 	if isLangExist && isGeoExist {
 		return
 	}
-	upgradePath := path.Join(global.CONF.Base.InstallDir, "1panel/tmp/upgrade")
+	upgradePath := path.Join(platform.TmpDir(global.CONF.Base.InstallDir), "upgrade")
 	tmpPath, err := loadRestorePath(upgradePath)
 	upgradeDir := path.Join(upgradePath, tmpPath, "downloads")
 	if err != nil || len(tmpPath) == 0 || !fileUtils.Stat(upgradeDir) {

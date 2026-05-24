@@ -16,6 +16,7 @@ import (
 
 	"github.com/1Panel-dev/1Panel/agent/cmd/server/docs"
 	"github.com/1Panel-dev/1Panel/agent/global"
+	"github.com/1Panel-dev/1Panel/agent/utils/platform"
 	"github.com/1Panel-dev/1Panel/agent/utils/re"
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
@@ -169,13 +170,14 @@ func resolveOperationValues(pathItem string, values map[string]interface{}, befo
 
 func newResolveDB(pathItem string) (*gorm.DB, error) {
 	dbFile := ""
+	dbDir := platform.DbDir(global.CONF.Base.InstallDir)
 	switch {
 	case strings.HasPrefix(pathItem, "/core"):
-		dbFile = path.Join(global.CONF.Base.InstallDir, "1panel/db/core.db")
+		dbFile = path.Join(dbDir, "core.db")
 	case strings.HasPrefix(pathItem, "/xpack"):
-		dbFile = path.Join(global.CONF.Base.InstallDir, "1panel/db/xpack.db")
+		dbFile = path.Join(dbDir, "xpack.db")
 	default:
-		dbFile = path.Join(global.CONF.Base.InstallDir, "1panel/db/agent.db")
+		dbFile = path.Join(dbDir, "agent.db")
 	}
 
 	db, err := gorm.Open(sqlite.Open(dbFile), &gorm.Config{

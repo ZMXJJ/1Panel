@@ -82,8 +82,9 @@ func handleUserInfo(tags string, settingRepo repo.ISettingRepo) {
 		}
 	}
 
-	_ = ctl_conf.RemoveValueFromFile("/usr/local/bin/1pctl", "CHANGE_USER_INFO", global.CONF.Base.ChangeUserInfo)
-	_ = ctl_conf.UpdateInFile("/usr/local/bin/1pctl", "ORIGINAL_PASSWORD", "**********")
+	ctlFile := ctl_conf.DefaultFile()
+	_ = ctl_conf.RemoveValueFromFile(ctlFile, "CHANGE_USER_INFO", global.CONF.Base.ChangeUserInfo)
+	_ = ctl_conf.UpdateInFile(ctlFile, "ORIGINAL_PASSWORD", "**********")
 }
 
 func generateKey() {

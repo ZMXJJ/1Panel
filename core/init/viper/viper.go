@@ -4,18 +4,18 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"path"
 
 	"github.com/1Panel-dev/1Panel/core/cmd/server/conf"
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
 func Init() {
-	baseDir := "/opt"
+	baseDir := platform.DefaultInstallDir()
 	port := "9999"
 	mode := ""
 	version := "v2.0.0"
@@ -30,22 +30,28 @@ func Init() {
 	if config.Base.Mode != "" {
 		mode = config.Base.Mode
 	}
-	_, err := os.Stat("/opt/1panel/conf/app.yaml")
+	_, err := os.Stat(platform.AppConfigPath())
 	if mode == "dev" && err == nil {
 		v.SetConfigName("app")
-		v.AddConfigPath(path.Join("/opt/1panel/conf"))
+		v.AddConfigPath(platform.ConfigDir())
 		if err := v.ReadInConfig(); err != nil {
 			panic(fmt.Errorf("fatal error config file: %s", err))
 		}
 	} else {
-		baseDir = ctl_conf.Load("BASE_DIR")
-		port = ctl_conf.Load("ORIGINAL_PORT")
-		version = ctl_conf.Load("ORIGINAL_VERSION")
-		username = ctl_conf.Load("ORIGINAL_USERNAME")
-		password = ctl_conf.Load("ORIGINAL_PASSWORD")
-		entrance = ctl_conf.Load("ORIGINAL_ENTRANCE")
-		language = ctl_conf.Load("LANGUAGE")
-		edition = ctl_conf.LoadWithoutPanic("PANEL_EDITION")
+		if !platform.IsDarwin() || mode != "dev" {
+			baseDir = ctl_conf.Load("BASE_DIR")
+			port = ctl_conf.Load("ORIGINAL_PORT")
+			version = ctl_conf.Load("ORIGINAL_VERSION")
+			username = ctl_conf.Load("ORIGINAL_USERNAME")
+			password = ctl_conf.Load("ORIGINAL_PASSWORD")
+			entrance = ctl_conf.Load("ORIGINAL_ENTRANCE")
+			language = ctl_conf.Load("LANGUAGE")
+			edition = ctl_conf.LoadWithoutPanic("PANEL_EDITION")
+		} else {
+			version = config.Base.Version
+			username = config.Base.Username
+			password = config.Base.Password
+		}
 
 		reader := bytes.NewReader(conf.AppYaml)
 		if err := v.ReadConfig(reader); err != nil {
@@ -61,7 +67,7 @@ func Init() {
 	if err := v.Unmarshal(&serverConfig); err != nil {
 		panic(err)
 	}
-	_, err = os.Stat("/opt/1panel/conf/app.yaml")
+	_, err = os.Stat(platform.AppConfigPath())
 	if mode == "dev" && err == nil {
 		if serverConfig.Base.InstallDir != "" {
 			baseDir = serverConfig.Base.InstallDir
@@ -101,6 +107,9 @@ func Init() {
 	global.CONF.Conn.Entrance = entrance
 	global.CONF.Conn.Port = port
 	global.Viper = v
+	if err := platform.EnsureCoreDirs(global.CONF.Base.InstallDir); err != nil {
+		panic(fmt.Errorf("init platform dirs failed: %s", err))
+	}
 }
 
 func loadChangeInfo() string {

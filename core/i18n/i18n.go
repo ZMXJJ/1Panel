@@ -209,12 +209,13 @@ func getLanguageFromDBInternal() string {
 	return lang
 }
 func getLanguageFrom1pctl() string {
-	info, err := ctl_conf.LoadFromFile("/usr/local/bin/1pctl", "LANGUAGE")
+	ctlFile := ctl_conf.DefaultFile()
+	info, err := ctl_conf.LoadFromFile(ctlFile, "LANGUAGE")
 	if err != nil {
 		panic(err)
 	}
 	if len(info) == 0 || info == `""` {
-		panic("error `LANGUAGE` find in /usr/local/bin/1pctl")
+		panic("error `LANGUAGE` find in " + ctlFile)
 	}
 	return info
 }

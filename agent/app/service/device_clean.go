@@ -21,6 +21,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/common"
 	"github.com/1Panel-dev/1Panel/agent/utils/docker"
 	fileUtils "github.com/1Panel-dev/1Panel/agent/utils/files"
+	"github.com/1Panel-dev/1Panel/agent/utils/platform"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/build"
 	"github.com/docker/docker/api/types/filters"
@@ -1036,13 +1037,13 @@ func dropTaskLog(logDir string) {
 	case "Clam":
 		_ = global.DB.Model(&model.ClamRecord{}).Where("task_id != ?", "").Select("task_id").Find(&usedTasks).Error
 	case "Tamper":
-		xpackDB, err := common.LoadDBConnByPathWithErr(path.Join(global.CONF.Base.InstallDir, "1panel/db/xpack.db"), "xpack.db")
+		xpackDB, err := common.LoadDBConnByPathWithErr(path.Join(platform.DbDir(global.CONF.Base.InstallDir), "xpack.db"), "xpack.db")
 		if err == nil {
 			_ = xpackDB.Table("tampers").Where("task_id != ?", "").Select("task_id").Find(&usedTasks).Error
 		}
 		defer common.CloseDB(xpackDB)
 	case "System":
-		xpackDB, err := common.LoadDBConnByPathWithErr(path.Join(global.CONF.Base.InstallDir, "1panel/db/xpack.db"), "xpack.db")
+		xpackDB, err := common.LoadDBConnByPathWithErr(path.Join(platform.DbDir(global.CONF.Base.InstallDir), "xpack.db"), "xpack.db")
 		if err == nil {
 			_ = xpackDB.Model("nodes").Where("task_id != ?", "").Select("task_id").Find(&usedTasks).Error
 		}

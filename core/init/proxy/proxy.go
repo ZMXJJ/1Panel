@@ -6,20 +6,22 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"time"
-)
 
-const SockPath = "/etc/1panel/agent.sock"
+	"github.com/1Panel-dev/1Panel/core/global"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
+)
 
 var (
 	LocalAgentProxy *httputil.ReverseProxy
 )
 
 func Init() {
+	sockPath := platform.AgentSocketPath(global.CONF.Base.InstallDir)
 	dialer := &net.Dialer{
 		Timeout: 5 * time.Second,
 	}
 	dialUnix := func(ctx context.Context, network, addr string) (net.Conn, error) {
-		return dialer.DialContext(ctx, "unix", SockPath)
+		return dialer.DialContext(ctx, "unix", sockPath)
 	}
 	transport := &http.Transport{
 		DialContext:         dialUnix,
