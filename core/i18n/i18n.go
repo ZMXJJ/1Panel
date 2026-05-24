@@ -9,6 +9,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/app/repo"
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/utils/ctl_conf"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -212,9 +213,15 @@ func getLanguageFrom1pctl() string {
 	ctlFile := ctl_conf.DefaultFile()
 	info, err := ctl_conf.LoadFromFile(ctlFile, "LANGUAGE")
 	if err != nil {
+		if platform.IsDarwin() {
+			return defaultLang
+		}
 		panic(err)
 	}
 	if len(info) == 0 || info == `""` {
+		if platform.IsDarwin() {
+			return defaultLang
+		}
 		panic("error `LANGUAGE` find in " + ctlFile)
 	}
 	return info
