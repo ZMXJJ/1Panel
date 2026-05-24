@@ -6,4 +6,5 @@
 
 | 文档 | 说明 |
 |------|------|
-| [prd.md](./prd.md) | 产品需求说明（PRD）与技术方案 v0.1 |
+| [prd.md](./prd.md) | 产品需求说明（PRD）与技术方案 v0.2 |
+| [development-plan.md](./development-plan.md) | 开发实施计划、PR 拆分、阶段验收与首批检查清单 |
