@@ -1,8 +1,10 @@
-# macOS 专属运维面板 — 产品需求说明与技术方案
+# Oasis — macOS 专属运维面板产品需求说明与技术方案
 
 | 属性 | 内容 |
 |------|------|
-| 文档版本 | v0.1（草案） |
+| 文档版本 | v0.2（草案） |
+| 文档路径 | `docs/macos-panel/prd.md` |
+| 产品名称 | Oasis |
 | 状态 | Draft — 供评审与迭代 |
 | 基线代码 | 1Panel `dev-v2`（2.x 架构：core + agent + frontend） |
 | 建议分支 | `platform/macos` 或 `cursor/macos-panel-*`（长期独立演进） |
@@ -33,7 +35,7 @@
 | 目标 OS | Linux 发行版 | macOS 13+（Ventura 及以后为主） |
 | 核心能力 | 全栈服务器管理 | **Docker 栈 + 文件 + 终端 + 自研应用商店** |
 | 代码关系 | 上游 | Fork 分支，选择性 cherry-pick |
-| 品牌 | 1Panel | **建议独立产品名**（避免用户混淆） |
+| 品牌 | 1Panel | **Oasis**（独立产品名，避免用户混淆） |
 | 应用商店 | 官方 165+ Linux 应用 | **Mac 精选商店**（自建仓库与 CI） |
 
 ---
@@ -46,7 +48,7 @@
 
 ### 2.2 定位（一句话）
 
-**运行在 macOS 本机的 Web 控制面板，通过 OrbStack / Docker Desktop 管理容器化自托管服务。**
+**Oasis 是运行在 macOS 本机的 Web 控制面板，通过 OrbStack / Docker Desktop 管理容器化自托管服务。**
 
 ### 2.3 非目标（明确不做）
 
@@ -94,7 +96,7 @@
 
 | 模块 | 功能点 | 验收标准 |
 |------|--------|----------|
-| 安装与生命周期 | macOS 安装器 / 脚本；launchd 托管 core+agent | 重启后自启动；`1pctl status` 可用 |
+| 安装与生命周期 | macOS 安装器 / 脚本；launchd 托管 core+agent | 重启后自启动；`oasisctl status` 可用 |
 | 面板基础 | 登录、MFA（复用 core）、修改端口/密码 | 与 Linux 版安全基线一致 |
 | Docker 引擎 | 检测 OrbStack / Docker Desktop；可配置 socket | `docker info` 成功；断连有明确提示 |
 | 容器 | 列表/详情/启停/删除/日志/终端 | 覆盖常用操作 |
@@ -102,7 +104,7 @@
 | 镜像 | 列表、拉取、删除、清理悬空镜像 | — |
 | 网络与卷 | 列表、基本管理 | v1 可不做高级策略编辑 |
 | 文件 | 浏览安装目录、上传下载、权限提示 | 路径限制在 `InstallDir` 内 |
-| Web 终端 | 连接容器 / 可选本机 shell | 危险命令拦截（复用现有策略） |
+| Web 终端 | 连接容器；本机 shell 暂缓 | 危险命令拦截（复用现有策略） |
 | 监控首页 | CPU/内存/磁盘、容器资源概览 | gopsutil + Docker API |
 | Mac 应用商店 | 浏览、安装、卸载、升级、参数表单 | ≥15 个经 CI 验证的应用 |
 | 设置 | 安装路径、Docker socket、语言 | — |
@@ -144,7 +146,7 @@
 | 类别 | 要求 |
 |------|------|
 | 性能 | 面板空闲内存占用 &lt; 200MB（core+agent 合计目标）；首页加载 &lt; 2s（本机） |
-| 安全 | 默认仅监听 localhost 或 LAN；强制首次改密；API Token 机制保留 |
+| 安全 | 默认允许局域网访问（LAN），首次启动展示访问范围与风险提示；强制首次改密；API Token 机制保留 |
 | 兼容 | macOS 13+；Apple Silicon（arm64）与 Intel（amd64）双架构 |
 | Docker | OrbStack 与 Docker Desktop 24+；Compose v2 |
 | 可用性 | Docker 未运行时面板可打开并引导，不崩溃 |
@@ -162,8 +164,8 @@ flowchart TB
   subgraph macOS["macOS 宿主机"]
     Browser[浏览器]
     subgraph panel["面板进程"]
-      Core[1panel-core<br/>认证 / 设置 / API]
-      Agent[1panel-agent<br/>Docker / 文件 / 任务]
+      Core[oasis-core<br/>认证 / 设置 / API]
+      Agent[oasis-agent<br/>Docker / 文件 / 任务]
     end
     subgraph engine["容器引擎"]
       Orb[OrbStack 或 Docker Desktop]
@@ -171,7 +173,7 @@ flowchart TB
       C1[容器 A]
       C2[容器 B]
     end
-    FS["~/Library/Application Support/Panel/"]
+    FS["~/Library/Application Support/Oasis/"]
   end
   Browser --> Core
   Core --> Agent
@@ -189,7 +191,7 @@ flowchart TB
 | `frontend/` | **保留为主**，通过路由/功能开关隐藏 Linux 菜单 |
 | `core/` | **保留**，改造路径、升级、安装；删除仅 Linux 的 API |
 | `agent/` | **保留主体**，Docker/文件/任务复用；Linux 服务代码 `//go:build linux` |
-| `docs/`（小写） | 不改动；Mac 文档放 `DOCS/` |
+| `docs/`（小写） | 不改动；Mac 文档放 `docs/macos-panel/`，必要时再提供 `DOCS/` 符号链接 |
 | 安装脚本（上游外部） | **新建** `scripts/macos/` |
 
 ### 6.3 平台抽象层（核心新增）
@@ -225,8 +227,8 @@ type Paths interface {
     InstallDir() string            // 数据根
     ConfigDir() string
     LogDir() string
-    BinDir() string                // 1pctl 所在目录
-    AppsDir() string               // 1panel/apps
+    BinDir() string                // oasisctl 所在目录
+    AppsDir() string               // Oasis apps
     AppResourcesDir() string       // 商店包缓存
     DockerSocketDefault() string
 }
@@ -251,14 +253,14 @@ type DockerHost interface {
 
 | 用途 | 路径 |
 |------|------|
-| 安装根目录（默认） | `~/Library/Application Support/1Panel` |
+| 安装根目录（默认） | `~/Library/Application Support/Oasis` |
 | 配置文件 | `{InstallDir}/conf/app.yaml` |
 | SQLite | `{InstallDir}/db/` |
 | 日志 | `{InstallDir}/log/` |
 | 应用数据 | `{InstallDir}/apps/` |
 | Mac 商店包 | `{InstallDir}/resource/apps/mac/` |
-| CLI | `/usr/local/bin/1pctl` 或 `{InstallDir}/bin/1pctl`（安装时写入 PATH） |
-| launchd plist | `~/Library/LaunchAgents/dev.1panel.core.plist` 等 |
+| CLI | `/usr/local/bin/oasisctl` 或 `{InstallDir}/bin/oasisctl`（安装时写入 PATH） |
+| launchd plist | `~/Library/LaunchAgents/dev.oasis.core.plist`、`~/Library/LaunchAgents/dev.oasis.agent.plist` |
 
 > 允许高级用户安装时自定义 `InstallDir`，但需检测 Docker 文件共享授权。
 
@@ -269,8 +271,8 @@ type DockerHost interface {
 ```makefile
 # 示意：Makefile.macos
 build-macos-arm64:
- cd core && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ../build/1panel-core ./cmd/server
- cd agent && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ../build/1panel-agent ./cmd/server
+ cd core && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ../build/oasis-core ./cmd/server
+ cd agent && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ../build/oasis-agent ./cmd/server
  cd frontend && npm run build:pro
  # 将 frontend dist 嵌入 core/cmd/server/web/assets
 ```
@@ -279,9 +281,9 @@ build-macos-arm64:
 
 | 产物 | 说明 |
 |------|------|
-| `1panel-macos-{version}-arm64.pkg` | 推荐：签名 + notarize |
-| `1panel-macos-{version}-amd64.pkg` | Intel Mac |
-| `1panel-macos-{version}.tar.gz` | 便携包（高级用户） |
+| `oasis-macos-{version}-arm64.pkg` | 推荐：签名 + notarize |
+| `oasis-macos-{version}-amd64.pkg` | Intel Mac |
+| `oasis-macos-{version}.tar.gz` | 便携包（高级用户） |
 | `SHA256SUMS` | 校验 |
 
 **不再使用** `1panel-{version}-linux-{arch}.tar.gz` 作为 Mac 升级包。
@@ -289,7 +291,7 @@ build-macos-arm64:
 #### 6.4.3 升级链路改造点
 
 - `core/app/service/upgrade.go`：下载 URL 改为 `darwin` + `arm64`/`amd64`。
-- 快照命名：`1panel-{scope}-{version}-darwin-{arch}-{time}`。
+- 快照命名：`oasis-{scope}-{version}-darwin-{arch}-{time}`。
 - 恢复逻辑：禁止跨 OS 恢复（保留现有架构校验思路）。
 
 ### 6.5 Docker 集成细节
@@ -357,7 +359,7 @@ export const featureFlags = {
 
 #### 6.6.3 文案与品牌
 
-- 关于页、标题栏使用 **独立产品名**（待定）。
+- 关于页、标题栏使用 **Oasis**。
 - 增加「Docker 引擎」状态卡片（OrbStack/DD）。
 
 ### 6.7 Mac 应用商店规范
@@ -472,9 +474,9 @@ sequenceDiagram
 
 | 项 | 方案 |
 |----|------|
-| 绑定地址 | 默认 `127.0.0.1`；可选 LAN（显式风险提示） |
+| 绑定地址 | 默认允许局域网访问（监听 `0.0.0.0` 或安装器选择的 LAN IP）；首次启动和设置页展示风险提示，并允许用户切回 `127.0.0.1` |
 | 文件管理 | 路径规范化 + 禁止 `..` 逃逸 InstallDir |
-| 终端 | 保留危险命令黑名单；Mac 本机 shell 默认关闭或二次确认 |
+| 终端 | 保留危险命令黑名单；Mac 本机 shell 暂缓，不进入首批开发 |
 | Docker socket | 等价于 root 级能力；关于页明确说明 |
 | 更新 | 签名校验；HTTPS 下载 |
 
@@ -556,11 +558,11 @@ dev-v2          # 上游主线（Linux）
 
 | # | 问题 | 选项 |
 |---|------|------|
-| 1 | 产品正式名称 | 1Panel Mac / PanelMac / 其他 |
-| 2 | 默认安装路径 | `~/Library/Application Support/1Panel` vs `/opt/1panel` |
+| 1 | 产品正式名称 | **已定：Oasis** |
+| 2 | 默认安装路径 | **已定：`~/Library/Application Support/Oasis`**；高级用户可选 `/opt/oasis` |
 | 3 | 是否捆绑推荐 OrbStack | 仅检测 vs 安装器内嵌跳转 |
-| 4 | v1 是否开放本机 shell 终端 | 默认关闭 / 开启需确认 |
-| 5 | 商店更新源 | 内置 Git 仓库 vs CDN 静态 index |
+| 4 | v1 是否开放本机 shell 终端 | **暂缓：不进入首批开发**，先只做容器终端 |
+| 5 | 商店更新源 | **暂缓：不进入首批开发**，后续再定内置 Git 仓库 vs CDN 静态 index |
 | 6 | 与飞致云商业版关系 | 完全独立社区版 vs 未来 Pro |
 
 ---
@@ -594,6 +596,7 @@ dev-v2          # 上游主线（Linux）
 | 版本 | 日期 | 说明 |
 |------|------|------|
 | v0.1 | 2026-05-24 | 初稿：PRD + 技术方案合一 |
+| v0.2 | 2026-05-24 | 明确产品名 Oasis、默认路径、局域网监听与首批暂缓项 |
 
 ---
 
