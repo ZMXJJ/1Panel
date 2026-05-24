@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>dev.oasis.agent</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>{{INSTALL_DIR}}/bin/oasis-agent</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>OASIS_INSTALL_DIR</key>
+		<string>{{INSTALL_DIR}}</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>WorkingDirectory</key>
+	<string>{{INSTALL_DIR}}</string>
+	<key>StandardOutPath</key>
+	<string>{{INSTALL_DIR}}/log/agent.launchd.log</string>
+	<key>StandardErrorPath</key>
+	<string>{{INSTALL_DIR}}/log/agent.launchd.err.log</string>
+</dict>
+</plist>

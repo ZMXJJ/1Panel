@@ -18,6 +18,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/constant"
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/utils/common"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 	"github.com/gin-gonic/gin"
 )
 
@@ -294,7 +295,7 @@ func (b *BaseApi) LoadFromCert(c *gin.Context) {
 // @Security Timestamp
 // @Router /core/settings/ssl/download [post]
 func (b *BaseApi) DownloadSSL(c *gin.Context) {
-	pathItem := path.Join(global.CONF.Base.InstallDir, "1panel/secret/server.crt")
+	pathItem := path.Join(platform.SecretDir(global.CONF.Base.InstallDir), "server.crt")
 	if _, err := os.Stat(pathItem); err != nil {
 		helper.InternalServer(c, err)
 		return

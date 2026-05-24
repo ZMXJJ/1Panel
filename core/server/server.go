@@ -32,6 +32,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/init/session/psession"
 	"github.com/1Panel-dev/1Panel/core/init/validator"
 	"github.com/1Panel-dev/1Panel/core/init/viper"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 	"github.com/1Panel-dev/1Panel/core/utils/re"
 )
 
@@ -153,8 +154,8 @@ func Start() {
 }
 
 func loadCert() *tls.Certificate {
-	certPath := path.Join(global.CONF.Base.InstallDir, "1panel/secret/server.crt")
-	keyPath := path.Join(global.CONF.Base.InstallDir, "1panel/secret/server.key")
+	certPath := path.Join(platform.SecretDir(global.CONF.Base.InstallDir), "server.crt")
+	keyPath := path.Join(platform.SecretDir(global.CONF.Base.InstallDir), "server.key")
 	certificate, err := os.ReadFile(certPath)
 	if err != nil {
 		panic(err)

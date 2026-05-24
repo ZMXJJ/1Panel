@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"strings"
 	"time"
 
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/log"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 
 	"github.com/sirupsen/logrus"
 )
@@ -29,7 +29,7 @@ func Init() {
 
 func setOutput(logger *logrus.Logger, config global.LogConfig) {
 	writer, err := log.NewWriterFromConfig(&log.Config{
-		LogPath:            path.Join(global.CONF.Base.InstallDir, "1panel/log"),
+		LogPath:            platform.LogDir(global.CONF.Base.InstallDir),
 		FileName:           config.LogName,
 		TimeTagFormat:      FileTImeFormat,
 		MaxRemain:          config.MaxBackup,

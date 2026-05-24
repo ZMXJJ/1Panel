@@ -14,6 +14,7 @@ import (
 	"github.com/1Panel-dev/1Panel/core/constant"
 	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/i18n"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
@@ -82,7 +83,7 @@ func NewTask(name, operate, taskScope, taskID string, resourceID uint) (*Task, e
 	if taskID == "" {
 		taskID = uuid.New().String()
 	}
-	logItem := path.Join(global.CONF.Base.InstallDir, "1panel/log/task")
+	logItem := path.Join(platform.LogDir(global.CONF.Base.InstallDir), "task")
 	logDir := path.Join(logItem, taskScope)
 	if _, err := os.Stat(logDir); os.IsNotExist(err) {
 		if err = os.MkdirAll(logDir, constant.DirPerm); err != nil {

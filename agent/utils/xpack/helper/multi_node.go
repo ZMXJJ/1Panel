@@ -11,6 +11,7 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/buserr"
 	"github.com/1Panel-dev/1Panel/agent/global"
 	"github.com/1Panel-dev/1Panel/agent/utils/common"
+	"github.com/1Panel-dev/1Panel/agent/utils/platform"
 	"github.com/1Panel-dev/1Panel/agent/utils/xpack/providers"
 	"github.com/gin-gonic/gin"
 )
@@ -29,8 +30,18 @@ func (m *multiNodeHelper) StartClam(startClam *model.Clam, isUpdate bool) (int, 
 
 func (m *multiNodeHelper) LoadNodeInfo(isBase bool) (model.NodeInfo, error) {
 	var info model.NodeInfo
-	info.BaseDir = common.LoadParams("BASE_DIR")
-	info.Version = common.LoadParams("ORIGINAL_VERSION")
+	info.BaseDir = common.LoadParamsWithoutPanic("BASE_DIR")
+	if info.BaseDir == "" {
+		if platform.IsDarwin() {
+			info.BaseDir = platform.DefaultInstallDir()
+		} else {
+			info.BaseDir = common.LoadParams("BASE_DIR")
+		}
+	}
+	info.Version = common.LoadParamsWithoutPanic("ORIGINAL_VERSION")
+	if info.Version == "" && !platform.IsDarwin() {
+		info.Version = common.LoadParams("ORIGINAL_VERSION")
+	}
 	info.Scope = "master"
 	global.IsMaster = true
 	return info, nil

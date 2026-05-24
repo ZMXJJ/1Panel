@@ -15,11 +15,13 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/1Panel-dev/1Panel/core/app/dto"
+	"github.com/1Panel-dev/1Panel/core/global"
 	"github.com/1Panel-dev/1Panel/core/i18n"
+	"github.com/1Panel-dev/1Panel/core/utils/platform"
 )
 
 func NewLocalClient(reqUrl, reqMethod string, body io.Reader, ctx *gin.Context) (interface{}, error) {
-	sockPath := "/etc/1panel/agent.sock"
+	sockPath := platform.AgentSocketPath(global.CONF.Base.InstallDir)
 	if _, err := os.Stat(sockPath); err != nil {
 		return nil, fmt.Errorf("no such agent.sock find in localhost, err: %v", err)
 	}

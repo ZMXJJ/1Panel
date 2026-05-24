@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
@@ -29,12 +30,11 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/init/validator"
 	"github.com/1Panel-dev/1Panel/agent/init/viper"
 	"github.com/1Panel-dev/1Panel/agent/utils/encrypt"
+	"github.com/1Panel-dev/1Panel/agent/utils/platform"
 	"github.com/1Panel-dev/1Panel/agent/utils/re"
 )
 
 const (
-	masterSocketDir          = "/etc/1panel"
-	masterSocketPath         = masterSocketDir + "/agent.sock"
 	masterSocketDirPerm      = 0o700
 	masterSocketFilePerm     = 0o600
 	masterSocketDirPermMask  = 0o077
@@ -120,6 +120,8 @@ func Start() {
 	}
 
 	if global.IsMaster {
+		masterSocketPath := platform.AgentSocketPath(global.CONF.Base.InstallDir)
+		masterSocketDir := filepath.Dir(masterSocketPath)
 		if err := prepareMasterSocketDir(masterSocketDir); err != nil {
 			panic(err)
 		}
